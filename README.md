@@ -1,71 +1,71 @@
-# dsh-wallpaper —— DeepSeek Harness 的 Wallpaper Engine 插件
+# dsh-wallpaper — Wallpaper Engine plugin for DeepSeek Harness
 
-让桌面版 DeepSeek Harness 接入 Wallpaper Engine:在**设置面板的「壁纸」分区**里把任意壁纸设为 **DeepSeek Harness 应用背景**(视频壁纸直接回放原视频);同时给 agent 提供 4 个操作桌面 Wallpaper Engine 的工具。
+Connects the desktop edition of DeepSeek Harness to Wallpaper Engine: set any wallpaper as the **DeepSeek Harness app background** from the **Wallpaper section of the settings panel** (video wallpapers play back the original video directly); it also gives the agent 4 tools for controlling the desktop Wallpaper Engine.
 
-## 前置条件
+## Prerequisites
 
-- 已安装 Steam 与 Wallpaper Engine(任意 Steam 库位置均可,自动发现)
-- 已安装 DshNative 桌面应用(rc.17 或更新)
+- Steam and Wallpaper Engine installed (any Steam library location works; auto-discovered)
+- DshNative desktop app installed (rc.17 or newer)
 
-## 安装
+## Installation
 
-右键 `install.ps1` → **使用 PowerShell 运行**(或:
+Right-click `install.ps1` → **Run with PowerShell** (or:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File install.ps1
 ```
 
-脚本做三件事:
-1. 把插件包复制到 `%LOCALAPPDATA%\DshNative\runtime\node_modules\@deepseek-ai\dsh-wallpaper`
-2. 建立 `~\.dsh\profiles\node_modules\@deepseek-ai\dsh-wallpaper` junction(profile 解析需要)
-3. 生成 `%LOCALAPPDATA%\DshNative\desktop.yml` overlay(数据目录 overlay 优先于应用目录,免管理员权限),在应用自带条目基础上追加本插件
+The script does three things:
+1. Copies the plugin package to `%LOCALAPPDATA%\DshNative\runtime\node_modules\@deepseek-ai\dsh-wallpaper`
+2. Creates a `~\.dsh\profiles\node_modules\@deepseek-ai\dsh-wallpaper` junction (required for profile resolution)
+3. Generates a `%LOCALAPPDATA%\DshNative\desktop.yml` overlay (the data-directory overlay takes priority over the app directory, no admin rights needed), appending this plugin to the app's built-in entries
 
-**重启 DeepSeek Harness 后生效。**
+**Takes effect after restarting DeepSeek Harness.**
 
-## 使用
+## Usage
 
-**换应用背景(图形界面)**:点击左侧栏底部的 ⚙ 设置按钮,左侧导航里点 **壁纸** 分区——顶部显示当前背景,搜索框过滤标题,下方是预览图网格:**点任意卡片即把它设为整页背景**(整个界面连同侧栏后方都透出壁纸,不加任何遮罩)。「恢复默认」一键还原。卡片类型标注了动效支持:**网页类=完整动效、视频类=动效、场景类=粒子实时动画**(场景是 Wallpaper Engine 专有格式,浏览器无法原生渲染;后端从 scene.pkg 提取图层合成静态底图,粒子系统导出为纯数据定义由前端 canvas 逐帧实时模拟——花瓣/雪/光尘在整页飘动,与 Wallpaper Engine 同源的物理语义;骨骼绑定动画等更复杂的效果仍只有网页/视频类)。每张卡片缩略图右上角还有一个悬停出现的「桌面」小按钮,可顺手把它设为桌面壁纸(走 Wallpaper Engine)。选择持久化在 `~\.dsh\plugin-wallpaper-ui.json`,重启后自动恢复。
+**Change the app background (graphical UI)**: click the ⚙ settings button at the bottom of the left sidebar, then click the **Wallpaper** section in the left navigation — the top shows the current background, a search box filters by title, and below is a grid of preview thumbnails: **click any card to set it as the full-page background** (the entire interface, including behind the sidebar, shows the wallpaper with no overlay mask). "Restore default" reverts in one click. Cards are labeled with their animation support: **web type = full animation, video type = animation, scene type = real-time particle animation** (scene is a Wallpaper Engine proprietary format that browsers cannot natively render; the backend extracts layers from scene.pkg to compose a static base image, and the particle system is exported as a pure data definition that the frontend canvas simulates frame-by-frame in real time — petals/snow/light dust drift across the whole page with the same physical semantics as Wallpaper Engine; more complex effects such as skeletal-bound animations are still only available for web/video types). Each card's thumbnail also has a small "desktop" button that appears in the top-right on hover, letting you set it as the desktop wallpaper (via Wallpaper Engine). The selection persists in `~\.dsh\plugin-wallpaper-ui.json` and is restored automatically after restart.
 
-对 agent 说自然语言也可以(操作的是**桌面** Wallpaper Engine):
+You can also talk to the agent in natural language (operating the **desktop** Wallpaper Engine):
 
-- 「列一下我装了哪些壁纸」
-- 「换个壁纸,要初音未来相关的」
-- 「现在用的是什么壁纸」
-- 「暂停壁纸」「壁纸静音」「隐藏桌面图标」「切下一个壁纸」
+- "List the wallpapers I have installed"
+- "Change to a wallpaper related to Hatsune Miku"
+- "What wallpaper am I using right now"
+- "Pause wallpaper" "mute wallpaper" "hide desktop icons" "next wallpaper"
 
-提供的 4 个工具:
+The 4 tools provided:
 
-| 工具 | 作用 |
-|------|------|
-| `wallpaper_list` | 列出已安装壁纸(id/标题/类型),支持标题过滤 |
-| `wallpaper_apply` | 按 workshop id 或标题应用壁纸,可选显示器;未运行时自动启动 Wallpaper Engine,应用后回读配置确认 |
+| Tool | Purpose |
+|------|---------|
+| `wallpaper_list` | List installed wallpapers (id/title/type), with title filtering |
+| `wallpaper_apply` | Apply a wallpaper by workshop id or title, optional monitor; auto-starts Wallpaper Engine if not running, then reads back the config to confirm |
 | `wallpaper_control` | pause / play / stop / mute / unmute / next / close / hide_icons / show_icons |
-| `wallpaper_current` | 查看当前壁纸(路径 + 标题) |
+| `wallpaper_current` | Show the current wallpaper (path + title) |
 
-## 配置(可选)
+## Configuration (optional)
 
-Steam 或 Wallpaper Engine 装在特殊位置时,编辑 `%LOCALAPPDATA%\DshNative\desktop.yml` 中插件条目:
+When Steam or Wallpaper Engine is installed in a special location, edit the plugin entry in `%LOCALAPPDATA%\DshNative\desktop.yml`:
 
 ```yaml
 - insert:
     - id: wallpaper
       name: '@deepseek-ai/dsh-wallpaper'
       config:
-        steamPath: 'E:\Steam'            # Steam 根目录(默认:注册表自动发现)
-        wallpaperEnginePath: ''           # wallpaper64.exe 完整路径(默认:Steam 库自动发现)
+        steamPath: 'E:\Steam'            # Steam root directory (default: auto-discovered from the registry)
+        wallpaperEnginePath: ''           # full path to wallpaper64.exe (default: auto-discovered from the Steam library)
 ```
 
-## 卸载
+## Uninstall
 
-右键 `uninstall.ps1` → **使用 PowerShell 运行**。移除插件包与链接,并删除数据目录 overlay(应用恢复使用安装目录自带 overlay)。
+Right-click `uninstall.ps1` → **Run with PowerShell**. Removes the plugin package and link, and deletes the data-directory overlay (the app reverts to the overlay shipped with its install directory).
 
-## 说明
+## Implementation notes
 
-- **应用背景实现(整页,两种挂载方式)**:设置选中后官方 UI 的大面积不透明背景全部透明化(`--dsw-alias-bg-base`、`--dsw-specific-sidebar-fill`,输入框 `--dsw-specific-input-major` 改为半透明玻璃色,明暗主题各一套)——壁纸贯穿整个页面包括侧栏后方;消息卡片等内容面板保留自身背景保证可读性,无任何叠加纱罩。**图片/场景壁纸直接画成 `body` 自身的不透明根背景**(CSS 双层堆叠:场景合成图盖在工作坊方形预览图上,最底是不透明兜底色;预览层在首次场景提取的数秒间先行铺底,真图就绪后盖上去,真图不可用时自然回落到预览)——根背景透明会让 Chromium 全文档关闭子像素抗锯齿(ClearType),灰度渲染的字形就是"壁纸文字发虚"的根因,不透明根背景把彩色子像素渲染找回来(端到端实测文字边缘彩色占比 56-60%,灰度渲染时接近 0)。**视频/网页壁纸仍走 `body` 下的 `position:fixed; z-index:-1` 背景层**(`<video>`/`<iframe>` 无法做 CSS 背景),其上文字保持灰度渲染是 Chromium 的固有约束。**弹窗(设置/Modal)是液态玻璃且壁纸保持动态**:弹窗打开时壁纸动画继续跑(弹窗只是浮在上面);面板为静态绘制的液态玻璃(82% 半透明底 + 160° 镜面渐变高光 + 1px 亮边 + 内光晕,明暗主题两套),遮罩减淡到 45%。**刻意不用 backdrop-filter**:Chromium 中任何 backdrop-filter 元素覆盖在视频/iframe 壁纸上时会冻结其动画帧(官方遮罩自带的 blur(2px) 也在其列),全部显式禁用,玻璃质感靠多层静态样式表达。
-- **局部自适应反色(暗壁纸可读性)**:客户端把壁纸按区域采样亮度(64×36 canvas,左侧 22% 为侧栏区、其余为主区;视频每 2 秒重采样,图片/网页壁纸取预览图采一次),侧栏区和主区各自独立判断:浅色主题下壁纸偏暗(<0.38)→ 该区域的文字/图标翻成官方暗色主题的墨色(近白);暗色主题下壁纸偏亮(>0.62)→ 翻回浅色主题墨色;中间调保持主题默认。作用域只覆盖直接坐在壁纸上的两块——侧栏(`[class*='sidebarCol']`)和空状态 hero(`[class*='_composerHero']`),新会话按钮(自带白底)排除在外;输入框玻璃在冲突时增浓到 86% 保深色文字可读。即"壁纸暗→字变白,壁纸亮→字变黑",自动跟随视频播放的明暗变化。
-- **进程稳定性(流式与子进程)**:视频/静态文件流式响应全部挂错误监听(`stream.on('error')` 销毁响应、`res.on('close')` 销毁流——浏览器切壁纸/隐藏标签页会随时中断背景视频请求,未消费的错误事件会打死整个后端进程);`startWallpaperEngine` 的 detached spawn 补 error 监听(exe 路径失效是异步 'error' 事件,同样会崩进程);JSON/文本响应在 headers 已发出后不再二次 writeHead。
-- **三种渲染模式**(按壁纸类型自动选择):视频壁纸播原视频(`<video>`,4K 原画质);**网页壁纸用 iframe 加载其 html 入口,壁纸自身的动效、粒子效果原生运行**(spine 骨骼动画、canvas 粒子等);**场景壁纸 = 静态底图 + 粒子实时动画**:后端从 scene.pkg 提取合成无粒子的图层底图(`?flat=1`),粒子系统编译为纯数据定义(`/scene-anim/<id>` JSON + `/scene-anim-tex/<id>/<idx>` 纹理图集,scene-art.js:发射器/初始化器/操作符语义,含 alpha/size/color 各 33 点曲线与振荡频率区间),前端 `#dshWpAnim` 叠层(`z-index:-1`,pointer-events none)canvas 逐帧模拟——年龄推进/重生、解析弹道积分(重力/阻力/涡旋)、参考实现语义的角速度积分、X/Y 轴独立随机振荡、雪碧表帧动画、逐粒子染色缓存;**canvas 每帧先重绘底图再混粒子,additive 混合(`lighter`)直接加在真实场景像素上**(透明叠层会让 additive 纹理的黑底经元素级合成显形为黑方块);封面变换与 body 背景一致,dpr≤2 超采样;导出不可用或底图解码失败时自动回落烘焙稳态合成图(纹理链支持 RGBA/DXT1/3/5/RG88/R8/JPEG + LZ4——约 1/4 场景壁纸的主图层是 JPEG-in-TEX,由内置 jpeg-js 解码器(vendored,Apache-2.0)光栅化,不丢层;共享粒子纹理回退到 WE assets 库;提取在 worker 线程,磁盘缓存 v5)。
-- 网页壁纸的静态资源( html/js/css/图片/字体/内嵌视频)由宿主半边 `/plugin-wallpaper/web/<id>/<路径>` 流式服务(支持 HTTP Range,路径 resolve 后做前缀校验防目录穿越,非文件返回 404)。
-- 控制走 Wallpaper Engine 官方命令行接口(`wallpaper64.exe -control ...`),读取当前壁纸走其 `config.json`(实测 `-control getWallpaper` 的输出无法从外部进程捕获)。
-- 壁纸列表每次调用实时扫描 workshop 目录,安装新壁纸无需重启。
-- 应用壁纸对 scene/video/web 类型统一传 `project.json` 路径(官方文档支持)。
+- **App background (full page, two mounting modes)**: once selected, the official UI's large opaque backgrounds are all made transparent (`--dsw-alias-bg-base`, `--dsw-specific-sidebar-fill`; the input box `--dsw-specific-input-major` becomes a semi-transparent glass color, one set per light/dark theme) — the wallpaper runs through the whole page including behind the sidebar; content panels such as message cards keep their own backgrounds for readability, with no overlay veil. **Image/scene wallpapers are drawn directly as the opaque root background of `body` itself** (CSS double-layer stacking: the scene composite sits over the workshop square preview, with an opaque fallback color at the bottom; the preview layer fills in during the first few seconds of scene extraction, the real image covers it when ready, and naturally falls back to the preview if the real image is unavailable) — a transparent root background makes Chromium disable subpixel anti-aliasing (ClearType) for the whole document; grayscale-rendered glyphs are the root cause of "wallpaper text looking blurry", and an opaque root background restores color subpixel rendering (end-to-end measurement: color ratio at text edges 56–60%, versus near 0 under grayscale rendering). **Video/web wallpapers still use a `position:fixed; z-index:-1` background layer under `body`** (`<video>`/`<iframe>` cannot serve as CSS backgrounds); text on top of them staying grayscale is an inherent Chromium constraint. **Popups (settings/Modal) are liquid glass and the wallpaper stays dynamic**: the wallpaper animation keeps running when a popup opens (the popup only floats above it); the panel is statically drawn liquid glass (82% translucent base + 160° specular gradient highlight + 1px bright edge + inner glow, one set per light/dark theme), with the mask lightened to 45%. **backdrop-filter is deliberately avoided**: in Chromium, any backdrop-filter element covering a video/iframe wallpaper freezes its animation frames (the official mask's own blur(2px) is among them); all are explicitly disabled, and the glass look is expressed through multiple static layers.
+- **Local adaptive contrast inversion (dark-wallpaper readability)**: the client samples per-region brightness of the wallpaper (64×36 canvas, the left 22% as the sidebar region and the rest as the main region; video resamples every 2 seconds, while image/web wallpapers sample once from the preview image), and the sidebar region and main region are each judged independently: in light theme, if the wallpaper is dark (<0.38) → that region's text/icons flip to the official dark theme's ink color (near-white); in dark theme, if the wallpaper is bright (>0.62) → flip back to the light theme ink color; midtones keep the theme default. The scope only covers the two blocks that sit directly on the wallpaper — the sidebar (`[class*='sidebarCol']`) and the empty-state hero (`[class*='_composerHero']`), excluding the new-session button (which has its own white background); the input glass intensifies to 86% on conflict to keep dark text readable. In short, "dark wallpaper → white text, bright wallpaper → black text", automatically following the video's brightness changes.
+- **Process stability (streams and subprocesses)**: every video/static-file streaming response attaches an error listener (`stream.on('error')` destroys the response, `res.on('close')` destroys the stream — the browser interrupts background video requests at any time when switching wallpapers or hiding tabs, and an unconsumed error event would kill the entire backend process); `startWallpaperEngine`'s detached spawn gets an error listener (an invalid exe path is an async 'error' event that would also crash the process); JSON/text responses never call writeHead twice after headers have been sent.
+- **Three render modes** (auto-selected by wallpaper type): video wallpapers play the original video (`<video>`, 4K native quality); **web wallpapers load their html entry via iframe, so their own animations and particle effects run natively** (spine skeletal animation, canvas particles, etc.); **scene wallpapers = static base image + real-time particle animation**: the backend extracts and composites the particle-free layers from scene.pkg as the base image (`?flat=1`), and compiles the particle system into a pure data definition (`/scene-anim/<id>` JSON + `/scene-anim-tex/<id>/<idx>` texture atlases; scene-art.js: emitter/initializer/operator semantics, including 33-point curves for alpha/size/color and oscillation frequency ranges), and the frontend `#dshWpAnim` overlay (`z-index:-1`, pointer-events none) canvas simulates frame-by-frame — age progression/respawn, analytic ballistic integration (gravity/drag/vortex), angular-velocity integration matching the reference implementation semantics, independent X/Y-axis random oscillation, sprite-sheet frame animation, per-particle tint caching; **the canvas redraws the base image first each frame and then blends particles, with additive blending (`lighter`) applied directly onto real scene pixels** (a transparent overlay would make the black background of additive textures show through element-level compositing as black squares); cover transformation matches the body background, oversampled for dpr≤2; when the export is unavailable or base-image decoding fails it automatically falls back to a baked steady-state composite image (the texture chain supports RGBA/DXT1/3/5/RG88/R8/JPEG + LZ4 — roughly 1/4 of scene wallpapers have a JPEG-in-TEX main layer, rasterized by a built-in jpeg-js decoder (vendored, Apache-2.0) so layers are not dropped; shared particle textures fall back to the WE assets library; extraction runs in a worker thread, disk cache v5).
+- Web wallpapers' static assets (html/js/css/images/fonts/embedded video) are streamed by the host side via `/plugin-wallpaper/web/<id>/<path>` (supports HTTP Range, resolves the path then prefix-validates against directory traversal, returns 404 for non-files).
+- Control goes through Wallpaper Engine's official command-line interface (`wallpaper64.exe -control ...`); reading the current wallpaper goes through its `config.json` (measured in practice: the output of `-control getWallpaper` cannot be captured from an external process).
+- Each wallpaper-list call scans the workshop directory in real time, so newly installed wallpapers need no restart.
+- Applying a wallpaper uniformly passes the `project.json` path for scene/video/web types (supported by the official docs).
